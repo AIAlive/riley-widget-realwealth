@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riley - RealWealth AI Assistant</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0a1628 0%, #0f1f3d 50%, #0a1628 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .widget-container {
+      background: #0f1f3d;
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(0, 180, 180, 0.2);
+    }
+    
+    /* Header / Branding */
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .logo-img {
+      height: 40px;
+      width: auto;
+    }
+    
+    .tagline {
+      color: #00b4b4;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+    
+    .title {
+      font-size: 28px;
+      color: #fff;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .subtitle {
+      color: #9ca3af;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    /* Mode Toggle */
+    .mode-toggle {
+      display: flex;
+      background: #0a1628;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+    
+    .mode-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      color: #9ca3af;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .mode-btn.active {
+      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
+      color: white;
+    }
+    
+    .mode-btn:hover:not(.active) {
+      color: #fff;
+    }
+    
+    /* Voice Mode */
+    .voice-section {
+      display: none;
+    }
+    
+    .voice-section.active {
+      display: block;
+    }
+    
+    .call-button {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      margin: 0 auto 16px;
+    }
+    
+    .call-button.start {
+      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
+      box-shadow: 0 8px 30px rgba(0, 180, 180, 0.4);
+    }
+    
+    .call-button.start:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba(0, 180, 180, 0.5);
+    }
+    
+    .call-button.active {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      box-shadow: 0 8px 30px rgba(239, 68, 68, 0.4);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 8px 30px rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 8px 50px rgba(239, 68, 68, 0.6); }
+    }
+    
+    .call-button svg {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .voice-hint {
+      text-align: center;
+      color: #6b7280;
+      font-size: 13px;
+    }
+    
+    .voice-status {
+      text-align: center;
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(0, 180, 180, 0.1);
+      border-radius: 8px;
+      color: #00b4b4;
+      font-size: 14px;
+      display: none;
+    }
+    
+    .voice-status.active {
+      display: block;
+    }
+    
+    /* Chat Mode */
+    .chat-section {
+      display: none;
+    }
+    
+    .chat-section.active {
+      display: block;
+    }
+    
+    .chat-messages {
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 16px;
+      padding: 16px;
+      background: #0a1628;
+      border-radius: 12px;
+    }
+    
+    .message {
+      margin-bottom: 12px;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message.user {
+      text-align: right;
+    }
+    
+    .message.assistant {
+      text-align: left;
+    }
+    
+    .message-bubble {
+      display: inline-block;
+      padding: 12px 16px;
+      border-radius: 16px;
+      max-width: 85%;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    .message.user .message-bubble {
+      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .message.assistant .message-bubble {
+      background: #1e3a5f;
+      color: #e5e7eb;
+      border-bottom-left-radius: 4px;
+    }
+    
+    .chat-input-container {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .chat-input {
+      flex: 1;
+      padding: 14px 16px;
+      border: 1px solid rgba(0, 180, 180, 0.3);
+      border-radius: 12px;
+      background: #0a1628;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    
+    .chat-input:focus {
+      border-color: #00b4b4;
+    }
+    
+    .chat-input::placeholder {
+      color: #6b7280;
+    }
+    
+    .send-btn {
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .send-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 24px 0;
+      color: #6b7280;
+      font-size: 13px;
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(107, 114, 128, 0.3);
+    }
+    
+    .divider span {
+      padding: 0 16px;
+    }
+    
+    /* Phone Number */
+    .phone-section {
+      text-align: center;
+    }
+    
+    .phone-label {
+      color: #9ca3af;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    
+    .phone-number {
+      color: #00b4b4;
+      font-size: 18px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .phone-number:hover {
+      color: #00d4d4;
+    }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(107, 114, 128, 0.2);
+    }
+    
+    .footer a {
+      color: #6b7280;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .footer a:hover {
+      color: #00b4b4;
+    }
+    
+    /* Loading Dots */
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+    }
+    
+    .typing-indicator span {
+      width: 8px;
+      height: 8px;
+      background: #00b4b4;
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+    
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="widget-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="https://realwealth.com/wp-content/uploads/realwealth-logo-white-300x57.png" alt="RealWealth" class="logo-img">
+      </div>
+      <div class="tagline">AI Investment Assistant</div>
+      <h1 class="title">Meet Riley</h1>
+      <p class="subtitle">Your RealWealth AI Investment Counselor.<br>Available 24/7 to answer questions and schedule appointments.</p>
+    </div>
+    
+    <!-- Mode Toggle -->
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="setMode('voice')" id="voice-tab">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+        Voice
+      </button>
+      <button class="mode-btn" onclick="setMode('chat')" id="chat-tab">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        Chat
+      </button>
+    </div>
+    
+    <!-- Voice Section -->
+    <div class="voice-section active" id="voice-section">
+      <button class="call-button start" id="call-button" onclick="toggleCall()">
+        <span id="call-text">Start Call</span>
+      </button>
+      <p class="voice-hint" id="voice-hint">Click to start a conversation</p>
+      <div class="voice-status" id="voice-status">
+        <span id="status-text">Connecting...</span>
+      </div>
+    </div>
+    
+    <!-- Chat Section -->
+    <div class="chat-section" id="chat-section">
+      <div class="chat-messages" id="chat-messages">
+        <div class="message assistant">
+          <div class="message-bubble">Hi! I'm Riley, your RealWealth AI assistant. How can I help you today?</div>
+        </div>
+      </div>
+      <div class="chat-input-container">
+        <input type="text" class="chat-input" id="chat-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+        <button class="send-btn" onclick="sendMessage()" id="send-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Divider -->
+    <div class="divider"><span>Or call directly</span></div>
+    
+    <!-- Phone -->
+    <div class="phone-section">
+      <p class="phone-label">Call us at</p>
+      <a href="tel:+13109190276" class="phone-number" id="phone-number">1 (310) 919-0276</a>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+      <a href="https://aialive.app" target="_blank">Powered by AI Alive</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/retell-client-js-sdk@3.1.0/dist/index.js"></script>
+  <script>
+    // Configuration
+    const API_BASE = window.location.origin;
+    
+    // State
+    let currentMode = 'voice';
+    let retellClient = null;
+    let isCallActive = false;
+    let chatSessionId = null;
+    
+    // Mode switching
+    function setMode(mode) {
+      currentMode = mode;
+      
+      document.getElementById('voice-tab').classList.toggle('active', mode === 'voice');
+      document.getElementById('chat-tab').classList.toggle('active', mode === 'chat');
+      document.getElementById('voice-section').classList.toggle('active', mode === 'voice');
+      document.getElementById('chat-section').classList.toggle('active', mode === 'chat');
+      
+      if (mode === 'chat' && !chatSessionId) {
+        startChatSession();
+      }
+    }
+    
+    // Voice Functions
+    async function toggleCall() {
+      if (isCallActive) {
+        endCall();
+      } else {
+        startCall();
+      }
+    }
+    
+    async function startCall() {
+      const button = document.getElementById('call-button');
+      const hint = document.getElementById('voice-hint');
+      const status = document.getElementById('voice-status');
+      const statusText = document.getElementById('status-text');
+      
+      try {
+        hint.textContent = 'Requesting microphone access...';
+        
+        // Get access token from server
+        const response = await fetch(`${API_BASE}/api/create-call`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to create call');
+        }
+        
+        const data = await response.json();
+        
+        // Initialize Retell client
+        retellClient = new RetellClient();
+        
+        retellClient.on('call_started', () => {
+          isCallActive = true;
+          button.classList.remove('start');
+          button.classList.add('active');
+          button.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
+          hint.textContent = 'Click to end call';
+          status.classList.add('active');
+          statusText.textContent = 'Connected - Speak now';
+        });
+        
+        retellClient.on('call_ended', () => {
+          resetCallUI();
+        });
+        
+        retellClient.on('error', (error) => {
+          console.error('Retell error:', error);
+          resetCallUI();
+          hint.textContent = 'Error occurred. Please try again.';
+        });
+        
+        retellClient.on('agent_start_talking', () => {
+          statusText.textContent = 'Riley is speaking...';
+        });
+        
+        retellClient.on('agent_stop_talking', () => {
+          statusText.textContent = 'Listening...';
+        });
+        
+        // Start the call
+        await retellClient.startCall({
+          accessToken: data.access_token
+        });
+        
+      } catch (error) {
+        console.error('Error starting call:', error);
+        hint.textContent = 'Failed to start call. Please try again.';
+      }
+    }
+    
+    function endCall() {
+      if (retellClient) {
+        retellClient.stopCall();
+      }
+      resetCallUI();
+    }
+    
+    function resetCallUI() {
+      isCallActive = false;
+      const button = document.getElementById('call-button');
+      const hint = document.getElementById('voice-hint');
+      const status = document.getElementById('voice-status');
+      
+      button.classList.add('start');
+      button.classList.remove('active');
+      button.innerHTML = '<span>Start Call</span>';
+      hint.textContent = 'Click to start a conversation';
+      status.classList.remove('active');
+    }
+    
+    // Chat Functions
+    async function startChatSession() {
+      try {
+        const response = await fetch(`${API_BASE}/chat/start`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          chatSessionId = data.session_id;
+        }
+      } catch (error) {
+        console.error('Error starting chat:', error);
+      }
+    }
+    
+    async function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const message = input.value.trim();
+      
+      if (!message) return;
+      
+      // Add user message
+      addMessage(message, 'user');
+      input.value = '';
+      
+      // Show typing indicator
+      showTypingIndicator();
+      
+      try {
+        const response = await fetch(`${API_BASE}/chat/message`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: chatSessionId,
+            message: message
+          })
+        });
+        
+        hideTypingIndicator();
+        
+        if (response.ok) {
+          const data = await response.json();
+          addMessage(data.response, 'assistant');
+        } else {
+          addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+        }
+      } catch (error) {
+        hideTypingIndicator();
+        addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+      }
+    }
+    
+    function addMessage(text, role) {
+      const container = document.getElementById('chat-messages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${role}`;
+      messageDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
+      container.appendChild(messageDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+    
+    function showTypingIndicator() {
+      const container = document.getElementById('chat-messages');
+      const indicator = document.createElement('div');
+      indicator.id = 'typing-indicator';
+      indicator.className = 'message assistant';
+      indicator.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+      container.appendChild(indicator);
+      container.scrollTop = container.scrollHeight;
+    }
+    
+    function hideTypingIndicator() {
+      const indicator = document.getElementById('typing-indicator');
+      if (indicator) indicator.remove();
+    }
+    
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+  </script>
+</body>
+</html>
