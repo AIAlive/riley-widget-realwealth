@@ -442,7 +442,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/retell-client-js-sdk@3.1.0/dist/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/retell-client-js-sdk@2.0.7/dist/index.umd.min.js"></script>
   <script>
     // Configuration
     const API_BASE = window.location.origin;
@@ -498,7 +498,7 @@
         const data = await response.json();
         
         // Initialize Retell client
-        retellClient = new RetellClient();
+        retellClient = new RetellClientJs.RetellWebClient();
         
         retellClient.on('call_started', () => {
           isCallActive = true;
