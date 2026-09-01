@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riley - RealWealth AI Investment Assistant</title>
+  <!-- RealWealth Widget v2.0 -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(180deg, #0a1628 0%, #0f1f3d 50%, #0a1628 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      padding: 20px;
+    }
+    
+    .container {
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+    }
+    
+    .logo { margin-bottom: 20px; }
+    .logo img { height: 40px; width: auto; }
+    
+    .hero-text {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #00b4b4;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+    
+    h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+      font-weight: 700;
+      color: #fff;
+    }
+    
+    .subtitle {
+      color: #9ca3af;
+      margin-bottom: 30px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    
+    /* Mode Toggle */
+    .mode-toggle {
+      display: flex;
+      background: #0a1628;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 25px;
+      max-width: 280px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .mode-btn {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      color: #6b7280;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    .mode-btn.active {
+      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
+      color: #fff;
+    }
+    
+    .mode-btn:hover:not(.active) { color: #fff; }
+    
+    /* Voice Section */
+    .voice-section { display: block; }
+    .voice-section.hidden { display: none; }
+    
+    #callButton {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 3px solid rgba(0, 180, 180, 0.3);
+      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 40px rgba(0, 180, 180, 0.3), 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    #callButton:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 60px rgba(0, 180, 180, 0.5);
+    }
+    
+    #callButton:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    
+    #callButton.active {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border-color: rgba(239, 68, 68, 0.3);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      70% { box-shadow: 0 0 0 25px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    
+    .status {
+      margin-top: 20px;
+      font-size: 14px;
+      padding: 10px 24px;
+      border-radius: 30px;
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .status.connected { background: rgba(0, 180, 180, 0.15); border-color: rgba(0, 180, 180, 0.3); color: #5eead4; }
+    .status.speaking { background: rgba(0, 180, 180, 0.15); border-color: rgba(0, 180, 180, 0.3); color: #99f6e4; }
+    .status.connecting { background: rgba(251, 191, 36, 0.15); border-color: rgba(251, 191, 36, 0.3); color: #fde68a; }
+    .status.error { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5; }
+    
+    #transcript {
+      margin-top: 25px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 20px;
+      max-height: 180px;
+      overflow-y: auto;
+      text-align: left;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    
+    #transcript:empty { display: none; }
+    #transcript p { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+    #transcript p:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    #transcript strong { color: #5eead4; }
+    
+    /* Chat Section */
+    .chat-section { display: none; }
+    .chat-section.active { display: block; }
+    
+    .chat-container {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .chat-messages {
+      height: 280px;
+      overflow-y: auto;
+      padding: 16px;
+      text-align: left;
+    }
+    
+    .chat-message {
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      max-width: 85%;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    .chat-message.agent {
+      background: rgba(0, 180, 180, 0.15);
+      border: 1px solid rgba(0, 180, 180, 0.2);
+      margin-right: auto;
+    }
+    
+    .chat-message.user {
+      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
+      margin-left: auto;
+    }
+    
+    .chat-message .sender {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+    
+    .chat-input-area {
+      display: flex;
+      padding: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 10px;
+    }
+    
+    #chatInput {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      background: rgba(10, 22, 40, 0.8);
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+    
+    #chatInput:focus { border-color: rgba(0, 180, 180, 0.5); }
+    #chatInput::placeholder { color: #6b7280; }
+    
+    #sendBtn {
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    #sendBtn:hover { transform: scale(1.02); }
+    #sendBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    /* Footer */
+    .phone-number {
+      margin-top: 25px;
+      font-size: 16px;
+      color: #9ca3af;
+    }
+    
+    .phone-number a {
+      color: #00b4b4;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .phone-number a:hover { text-decoration: underline; }
+    
+    .powered-by {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #4b5563;
+    }
+    
+    .powered-by a { color: #00b4b4; text-decoration: none; }
+    .powered-by a:hover { text-decoration: underline; }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 180, 180, 0.3); border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <img src="https://realwealth.com/wp-content/uploads/realwealth-logo-white-300x57.png" alt="RealWealth">
+    </div>
+    
+    <p class="hero-text">AI Investment Assistant</p>
+    <h1>Meet Riley</h1>
+    <p class="subtitle">Your RealWealth AI Investment Counselor.<br>Available 24/7 to answer questions and schedule appointments.</p>
+    
+    <!-- Mode Toggle -->
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="voiceModeBtn" onclick="switchMode('voice')">🎤 Voice</button>
+      <button class="mode-btn" id="chatModeBtn" onclick="switchMode('chat')">💬 Chat</button>
+    </div>
+    
+    <!-- Voice Section -->
+    <div class="voice-section" id="voiceSection">
+      <button id="callButton" onclick="toggleCall()">Start Call</button>
+      <p id="status" class="status idle">Click to start a conversation</p>
+      <div id="transcript"></div>
+    </div>
+    
+    <!-- Chat Section -->
+    <div class="chat-section" id="chatSection">
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-message agent">
+            <div class="sender">Riley</div>
+            Hi! I'm Riley, your RealWealth AI assistant. How can I help you today?
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="handleChatKeypress(event)">
+          <button id="sendBtn" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+    
+    <p class="phone-number">
+      Or call: <a href="tel:+13109190276">1 (310) 919-0276</a>
+    </p>
+    
+    <p class="powered-by">
+      Powered by <a href="https://aialive.app" target="_blank">AI Alive</a>
+    </p>
+  </div>
+  
+  <!-- Voice: Retell SDK bundle -->
+  <script src="/bundle.js"></script>
+  
+  <!-- Chat Logic -->
+  <script>
+    let currentMode = 'voice';
+    let chatId = null;
+    let chatLoading = false;
+    
+    function switchMode(mode) {
+      currentMode = mode;
+      
+      document.getElementById('voiceModeBtn').classList.toggle('active', mode === 'voice');
+      document.getElementById('chatModeBtn').classList.toggle('active', mode === 'chat');
+      
+      document.getElementById('voiceSection').classList.toggle('hidden', mode !== 'voice');
+      document.getElementById('chatSection').classList.toggle('active', mode === 'chat');
+      
+      if (mode === 'chat' && !chatId) {
+        startChatSession();
+      }
+    }
+    
+    async function startChatSession() {
+      try {
+        const response = await fetch('/chat/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          chatId = data.chat_id;
+          console.log('Chat session started:', chatId);
+        } else {
+          console.error('Failed to start chat session');
+          addChatMessage('agent', 'Sorry, chat is temporarily unavailable. Please try voice instead.');
+        }
+      } catch (error) {
+        console.error('Error starting chat:', error);
+        addChatMessage('agent', 'Sorry, chat is temporarily unavailable. Please try voice instead.');
+      }
+    }
+    
+    function handleChatKeypress(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    }
+    
+    async function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const message = input.value.trim();
+      
+      if (!message || chatLoading) return;
+      
+      if (!chatId) {
+        await startChatSession();
+        if (!chatId) return;
+      }
+      
+      input.value = '';
+      addChatMessage('user', message);
+      
+      chatLoading = true;
+      document.getElementById('sendBtn').disabled = true;
+      
+      try {
+        const response = await fetch('/chat/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, content: message })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.messages && data.messages.length > 0) {
+            const agentMessages = data.messages.filter(m => m.role === 'agent');
+            agentMessages.forEach(m => {
+              if (m.content) addChatMessage('agent', m.content);
+            });
+          }
+        } else {
+          addChatMessage('agent', 'Sorry, I had trouble understanding. Could you try again?');
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+        addChatMessage('agent', 'Sorry, something went wrong. Please try again.');
+      } finally {
+        chatLoading = false;
+        document.getElementById('sendBtn').disabled = false;
+      }
+    }
+    
+    function addChatMessage(role, content) {
+      const messagesDiv = document.getElementById('chatMessages');
+      const messageEl = document.createElement('div');
+      messageEl.className = `chat-message ${role}`;
+      
+      if (role === 'agent') {
+        messageEl.innerHTML = `<div class="sender">Riley</div>${content}`;
+      } else {
+        messageEl.textContent = content;
+      }
+      
+      messagesDiv.appendChild(messageEl);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+  </script>
+</body>
+</html>
