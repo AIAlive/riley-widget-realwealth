@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Riley - RealWealth AI Assistant</title>
+  <title>Riley - RealWealth AI Investment Assistant</title>
+  <!-- RealWealth Widget v1.1 -->
   <style>
     * {
       box-sizing: border-box;
@@ -13,7 +14,7 @@
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #0a1628 0%, #0f1f3d 50%, #0a1628 100%);
+      background: linear-gradient(135deg, #0a1628 0%, #0f1f3d 50%, #16213e 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -42,20 +43,35 @@
       align-items: center;
       justify-content: center;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
     }
     
-    .logo-img {
-      height: 40px;
-      width: auto;
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .logo-text {
+      font-size: 32px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     .tagline {
       color: #00b4b4;
-      font-size: 11px;
+      font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 2px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     
     .title {
@@ -98,7 +114,7 @@
     }
     
     .mode-btn.active {
-      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
+      background: linear-gradient(135deg, #00b4b4 0%, #7c3aed 100%);
       color: white;
     }
     
@@ -132,50 +148,51 @@
     }
     
     .call-button.start {
-      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
-      box-shadow: 0 8px 30px rgba(0, 180, 180, 0.4);
+      background: linear-gradient(135deg, #00b4b4 0%, #7c3aed 100%);
+      border-color: rgba(0, 180, 180, 0.3);
     }
     
     .call-button.start:hover {
       transform: scale(1.05);
-      box-shadow: 0 12px 40px rgba(0, 180, 180, 0.5);
+      box-shadow: 0 0 30px rgba(0, 180, 180, 0.5);
     }
     
     .call-button.active {
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      box-shadow: 0 8px 30px rgba(239, 68, 68, 0.4);
-      animation: pulse 2s infinite;
+      border-color: rgba(239, 68, 68, 0.3);
+      animation: pulse-ring 2s infinite;
     }
     
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 8px 30px rgba(239, 68, 68, 0.4); }
-      50% { box-shadow: 0 8px 50px rgba(239, 68, 68, 0.6); }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
     
-    .call-button svg {
-      width: 32px;
-      height: 32px;
-    }
-    
-    .voice-hint {
-      text-align: center;
-      color: #6b7280;
-      font-size: 13px;
+    .call-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
     }
     
     .voice-status {
       text-align: center;
-      margin-top: 16px;
-      padding: 12px;
+      padding: 12px 20px;
       background: rgba(0, 180, 180, 0.1);
-      border-radius: 8px;
+      border-radius: 20px;
       color: #00b4b4;
       font-size: 14px;
-      display: none;
+      margin-bottom: 16px;
     }
     
     .voice-status.active {
-      display: block;
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+    
+    .voice-status.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
     }
     
     /* Chat Mode */
@@ -188,12 +205,26 @@
     }
     
     .chat-messages {
-      height: 300px;
+      background: #0a1628;
+      border-radius: 16px;
+      padding: 16px;
+      height: 280px;
       overflow-y: auto;
       margin-bottom: 16px;
-      padding: 16px;
-      background: #0a1628;
-      border-radius: 12px;
+      border: 1px solid rgba(0, 180, 180, 0.1);
+    }
+    
+    .chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: #00b4b4;
+      border-radius: 3px;
     }
     
     .message {
@@ -206,50 +237,87 @@
       to { opacity: 1; transform: translateY(0); }
     }
     
+    .message.agent {
+      text-align: left;
+    }
+    
     .message.user {
       text-align: right;
     }
     
-    .message.assistant {
-      text-align: left;
-    }
-    
     .message-bubble {
       display: inline-block;
+      max-width: 85%;
       padding: 12px 16px;
       border-radius: 16px;
-      max-width: 85%;
       font-size: 14px;
       line-height: 1.5;
     }
     
-    .message.user .message-bubble {
-      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
-      color: white;
-      border-bottom-right-radius: 4px;
-    }
-    
-    .message.assistant .message-bubble {
-      background: #1e3a5f;
+    .message.agent .message-bubble {
+      background: rgba(0, 180, 180, 0.2);
       color: #e5e7eb;
       border-bottom-left-radius: 4px;
     }
     
+    .message.user .message-bubble {
+      background: linear-gradient(135deg, #00b4b4 0%, #7c3aed 100%);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .message-label {
+      font-size: 11px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    
+    .typing-indicator {
+      display: none;
+      padding: 12px 16px;
+      background: rgba(0, 180, 180, 0.2);
+      border-radius: 16px;
+      border-bottom-left-radius: 4px;
+      width: fit-content;
+    }
+    
+    .typing-indicator.visible {
+      display: block;
+    }
+    
+    .typing-indicator span {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #00b4b4;
+      border-radius: 50%;
+      margin-right: 4px;
+      animation: typing 1.4s infinite;
+    }
+    
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; margin-right: 0; }
+    
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-8px); }
+    }
+    
     .chat-input-container {
       display: flex;
-      gap: 8px;
+      gap: 12px;
     }
     
     .chat-input {
       flex: 1;
-      padding: 14px 16px;
-      border: 1px solid rgba(0, 180, 180, 0.3);
-      border-radius: 12px;
+      padding: 14px 18px;
       background: #0a1628;
+      border: 1px solid rgba(0, 180, 180, 0.2);
+      border-radius: 12px;
       color: #fff;
       font-size: 14px;
       outline: none;
-      transition: border-color 0.3s;
+      transition: border-color 0.3s ease;
     }
     
     .chat-input:focus {
@@ -260,54 +328,69 @@
       color: #6b7280;
     }
     
-    .send-btn {
+    .send-button {
       padding: 14px 20px;
-      background: linear-gradient(135deg, #00b4b4 0%, #008080 100%);
+      background: linear-gradient(135deg, #00b4b4 0%, #7c3aed 100%);
       border: none;
       border-radius: 12px;
       color: white;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
-    .send-btn:hover {
+    .send-button:hover {
       transform: scale(1.05);
     }
     
-    .send-btn:disabled {
+    .send-button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
       transform: none;
     }
     
-    /* Divider */
-    .divider {
-      display: flex;
-      align-items: center;
-      margin: 24px 0;
-      color: #6b7280;
+    /* Transcript (for voice mode) */
+    .transcript {
+      background: #0a1628;
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 150px;
+      overflow-y: auto;
       font-size: 13px;
+      line-height: 1.6;
+      display: none;
+      border: 1px solid rgba(0, 180, 180, 0.1);
     }
     
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(107, 114, 128, 0.3);
+    .transcript.visible {
+      display: block;
+      margin-top: 16px;
     }
     
-    .divider span {
-      padding: 0 16px;
+    .transcript p {
+      margin-bottom: 8px;
+    }
+    
+    .transcript .agent {
+      color: #00b4b4;
+    }
+    
+    .transcript .user {
+      color: #008080;
     }
     
     /* Phone Number */
     .phone-section {
       text-align: center;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0, 180, 180, 0.1);
     }
     
-    .phone-label {
-      color: #9ca3af;
+    .phone-text {
+      color: #6b7280;
       font-size: 13px;
       margin-bottom: 4px;
     }
@@ -317,62 +400,40 @@
       font-size: 18px;
       font-weight: 600;
       text-decoration: none;
-      transition: color 0.3s;
     }
     
     .phone-number:hover {
-      color: #00d4d4;
+      color: #a78bfa;
     }
     
     /* Footer */
     .footer {
       text-align: center;
       margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(107, 114, 128, 0.2);
+      color: #4b5563;
+      font-size: 12px;
     }
     
     .footer a {
+      color: #00b4b4;
+      text-decoration: none;
+    }
+    
+    /* Mic Permission Hint */
+    .mic-hint {
+      text-align: center;
       color: #6b7280;
       font-size: 12px;
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-    
-    .footer a:hover {
-      color: #00b4b4;
-    }
-    
-    /* Loading Dots */
-    .typing-indicator {
-      display: flex;
-      gap: 4px;
-      padding: 12px 16px;
-    }
-    
-    .typing-indicator span {
-      width: 8px;
-      height: 8px;
-      background: #00b4b4;
-      border-radius: 50%;
-      animation: bounce 1.4s infinite ease-in-out;
-    }
-    
-    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-    
-    @keyframes bounce {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1); }
+      margin-top: 12px;
     }
   </style>
 </head>
 <body>
-  <div class="widget-container">
+  <div class="widget-container" id="widget">
     <!-- Header -->
     <div class="header">
       <div class="logo">
-        <img src="https://realwealth.com/wp-content/uploads/realwealth-logo-white-300x57.png" alt="RealWealth" class="logo-img">
+        <img src="https://realwealth.com/wp-content/uploads/realwealth-logo-white-300x57.png" alt="RealWealth" style="height: 32px;">
       </div>
       <div class="tagline">AI Investment Assistant</div>
       <h1 class="title">Meet Riley</h1>
@@ -381,266 +442,379 @@
     
     <!-- Mode Toggle -->
     <div class="mode-toggle">
-      <button class="mode-btn active" onclick="setMode('voice')" id="voice-tab">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-          <line x1="12" y1="19" x2="12" y2="23"></line>
-          <line x1="8" y1="23" x2="16" y2="23"></line>
-        </svg>
-        Voice
+      <button class="mode-btn active" id="voiceModeBtn" onclick="switchMode('voice')">
+        <span>🎤</span> Voice
       </button>
-      <button class="mode-btn" onclick="setMode('chat')" id="chat-tab">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-        </svg>
-        Chat
+      <button class="mode-btn" id="chatModeBtn" onclick="switchMode('chat')">
+        <span>💬</span> Chat
       </button>
     </div>
     
     <!-- Voice Section -->
-    <div class="voice-section active" id="voice-section">
-      <button class="call-button start" id="call-button" onclick="toggleCall()">
-        <span id="call-text">Start Call</span>
+    <div class="voice-section active" id="voiceSection">
+      <button id="callButton" class="call-button start" onclick="toggleCall()">
+        Start Call
       </button>
-      <p class="voice-hint" id="voice-hint">Click to start a conversation</p>
-      <div class="voice-status" id="voice-status">
-        <span id="status-text">Connecting...</span>
+      
+      <div id="voiceStatus" class="voice-status">
+        Click to start a conversation
       </div>
+      
+      <div id="transcript" class="transcript"></div>
+      
+      <p class="mic-hint">Click the button and allow microphone access to speak with Riley.</p>
     </div>
     
     <!-- Chat Section -->
-    <div class="chat-section" id="chat-section">
-      <div class="chat-messages" id="chat-messages">
-        <div class="message assistant">
-          <div class="message-bubble">Hi! I'm Riley, your RealWealth AI assistant. How can I help you today?</div>
+    <div class="chat-section" id="chatSection">
+      <div class="chat-messages" id="chatMessages">
+        <div class="message agent">
+          <div class="message-label">Riley</div>
+          <div class="message-bubble">Thanks for reaching out! How can I help you today?</div>
         </div>
       </div>
+      
+      <div class="typing-indicator" id="typingIndicator">
+        <span></span><span></span><span></span>
+      </div>
+      
       <div class="chat-input-container">
-        <input type="text" class="chat-input" id="chat-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
-        <button class="send-btn" onclick="sendMessage()" id="send-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
+        <input 
+          type="text" 
+          class="chat-input" 
+          id="chatInput" 
+          placeholder="Type your message..."
+          onkeypress="handleKeyPress(event)"
+        >
+        <button class="send-button" id="sendButton" onclick="sendMessage()">
+          ➤
         </button>
       </div>
     </div>
     
-    <!-- Divider -->
-    <div class="divider"><span>Or call directly</span></div>
-    
-    <!-- Phone -->
+    <!-- Phone Number -->
     <div class="phone-section">
-      <p class="phone-label">Call us at</p>
-      <a href="tel:+13109190276" class="phone-number" id="phone-number">1 (310) 919-0276</a>
+      <p class="phone-text">Or call:</p>
+      <a href="tel:+13109190276" class="phone-number">1 (310) 919-0276</a>
     </div>
     
     <!-- Footer -->
     <div class="footer">
-      <a href="https://aialive.app" target="_blank">Powered by AI Alive</a>
+      Powered by <a href="https://aialive.app" target="_blank">AI Alive</a> · <a href="https://realwealth.com/privacy-policy/" target="_blank">Privacy</a> · <a href="https://realwealth.com/terms-of-use/" target="_blank">Terms</a>
     </div>
   </div>
 
+  <!-- Retell Web Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/retell-client-js-sdk@2.0.7/dist/index.umd.min.js"></script>
+  
   <script>
-    // Configuration
-    const API_BASE = window.location.origin;
+    // ==========================================================================
+    // CONFIGURATION
+    // ==========================================================================
     
-    // State
-    let currentMode = 'voice';
-    let retellClient = null;
+    const CONFIG = {
+      // Voice agent settings
+      voiceAgentId: window.RILEY_VOICE_AGENT_ID || 'YOUR_VOICE_AGENT_ID',
+      
+      // Chat agent settings (will be set after voice agent is converted)
+      chatAgentId: window.RILEY_CHAT_AGENT_ID || null,
+      
+      // Backend service URL (Railway)
+      backendUrl: window.RILEY_BACKEND_URL || 'https://riley-hubspot-service-production.up.railway.app',
+      
+      // Phone number to display
+      phoneNumber: window.RILEY_PHONE_NUMBER || '1 (310) 919-0276'
+    };
+    
+    // ==========================================================================
+    // STATE
+    // ==========================================================================
+    
+    let currentMode = 'voice'; // 'voice' or 'chat'
     let isCallActive = false;
-    let chatSessionId = null;
+    let chatId = null;
+    let retellWebClient = null;
     
-    // Mode switching
-    function setMode(mode) {
+    // ==========================================================================
+    // INITIALIZATION
+    // ==========================================================================
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize Retell Web Client for voice
+      retellWebClient = new RetellClientJs.RetellWebClient();
+      setupVoiceEvents();
+      
+      // Check if chat is available
+      if (!CONFIG.chatAgentId) {
+        // Hide chat mode if not configured
+        document.getElementById('chatModeBtn').style.opacity = '0.5';
+        document.getElementById('chatModeBtn').title = 'Chat coming soon';
+      }
+    });
+    
+    // ==========================================================================
+    // MODE SWITCHING
+    // ==========================================================================
+    
+    function switchMode(mode) {
+      // Check if chat is available
+      if (mode === 'chat' && !CONFIG.chatAgentId) {
+        alert('Chat mode coming soon! Use voice for now.');
+        return;
+      }
+      
       currentMode = mode;
       
-      document.getElementById('voice-tab').classList.toggle('active', mode === 'voice');
-      document.getElementById('chat-tab').classList.toggle('active', mode === 'chat');
-      document.getElementById('voice-section').classList.toggle('active', mode === 'voice');
-      document.getElementById('chat-section').classList.toggle('active', mode === 'chat');
+      // Update toggle buttons
+      document.getElementById('voiceModeBtn').classList.toggle('active', mode === 'voice');
+      document.getElementById('chatModeBtn').classList.toggle('active', mode === 'chat');
       
-      if (mode === 'chat' && !chatSessionId) {
+      // Update sections
+      document.getElementById('voiceSection').classList.toggle('active', mode === 'voice');
+      document.getElementById('chatSection').classList.toggle('active', mode === 'chat');
+      
+      // Start chat session if switching to chat
+      if (mode === 'chat' && !chatId) {
         startChatSession();
       }
     }
     
-    // Voice Functions
+    // ==========================================================================
+    // VOICE MODE
+    // ==========================================================================
+    
+    function setupVoiceEvents() {
+      retellWebClient.on('call_started', () => {
+        console.log('Call started');
+        isCallActive = true;
+        updateVoiceUI('active', 'Riley is listening...', true);
+      });
+      
+      retellWebClient.on('call_ended', () => {
+        console.log('Call ended');
+        isCallActive = false;
+        updateVoiceUI('idle', 'Call ended', false);
+      });
+      
+      retellWebClient.on('agent_start_talking', () => {
+        document.getElementById('voiceStatus').textContent = 'Riley is speaking...';
+      });
+      
+      retellWebClient.on('agent_stop_talking', () => {
+        if (isCallActive) {
+          document.getElementById('voiceStatus').textContent = 'Riley is listening...';
+        }
+      });
+      
+      retellWebClient.on('update', (update) => {
+        if (update.transcript) {
+          updateTranscript(update.transcript);
+        }
+      });
+      
+      retellWebClient.on('error', (error) => {
+        console.error('Retell error:', error);
+        updateVoiceUI('error', `Error: ${error.message || 'Connection failed'}`, false);
+        isCallActive = false;
+      });
+    }
+    
     async function toggleCall() {
       if (isCallActive) {
         endCall();
       } else {
-        startCall();
+        await startCall();
       }
     }
     
     async function startCall() {
-      const button = document.getElementById('call-button');
-      const hint = document.getElementById('voice-hint');
-      const status = document.getElementById('voice-status');
-      const statusText = document.getElementById('status-text');
+      const callButton = document.getElementById('callButton');
+      callButton.disabled = true;
+      updateVoiceUI('connecting', 'Connecting...', false);
       
       try {
-        hint.textContent = 'Requesting microphone access...';
-        
-        // Get access token from server
-        const response = await fetch(`${API_BASE}/api/create-call`, {
+        // Get access token from backend
+        const response = await fetch(`${CONFIG.backendUrl}/api/create-call`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agent_id: CONFIG.voiceAgentId })
         });
         
         if (!response.ok) {
-          throw new Error('Failed to create call');
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to create call');
         }
         
         const data = await response.json();
+        console.log('Got access token for call:', data.call_id);
         
-        // Initialize Retell client
-        retellClient = new RetellClientJs.RetellWebClient();
-        
-        retellClient.on('call_started', () => {
-          isCallActive = true;
-          button.classList.remove('start');
-          button.classList.add('active');
-          button.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
-          hint.textContent = 'Click to end call';
-          status.classList.add('active');
-          statusText.textContent = 'Connected - Speak now';
+        // Start the call with Retell
+        await retellWebClient.startCall({
+          accessToken: data.access_token,
+          sampleRate: 24000,
         });
         
-        retellClient.on('call_ended', () => {
-          resetCallUI();
-        });
-        
-        retellClient.on('error', (error) => {
-          console.error('Retell error:', error);
-          resetCallUI();
-          hint.textContent = 'Error occurred. Please try again.';
-        });
-        
-        retellClient.on('agent_start_talking', () => {
-          statusText.textContent = 'Riley is speaking...';
-        });
-        
-        retellClient.on('agent_stop_talking', () => {
-          statusText.textContent = 'Listening...';
-        });
-        
-        // Start the call
-        await retellClient.startCall({
-          accessToken: data.access_token
-        });
+        // Update button
+        callButton.classList.remove('start');
+        callButton.classList.add('active');
+        callButton.textContent = 'End Call';
+        callButton.disabled = false;
         
       } catch (error) {
-        console.error('Error starting call:', error);
-        hint.textContent = 'Failed to start call. Please try again.';
+        console.error('Failed to start call:', error);
+        updateVoiceUI('error', `Failed: ${error.message}`, false);
+        callButton.disabled = false;
       }
     }
     
     function endCall() {
-      if (retellClient) {
-        retellClient.stopCall();
-      }
-      resetCallUI();
-    }
-    
-    function resetCallUI() {
-      isCallActive = false;
-      const button = document.getElementById('call-button');
-      const hint = document.getElementById('voice-hint');
-      const status = document.getElementById('voice-status');
+      retellWebClient.stopCall();
       
-      button.classList.add('start');
-      button.classList.remove('active');
-      button.innerHTML = '<span>Start Call</span>';
-      hint.textContent = 'Click to start a conversation';
-      status.classList.remove('active');
+      const callButton = document.getElementById('callButton');
+      callButton.classList.remove('active');
+      callButton.classList.add('start');
+      callButton.textContent = 'Start Call';
+      
+      isCallActive = false;
     }
     
-    // Chat Functions
+    function updateVoiceUI(state, message, isActive) {
+      const status = document.getElementById('voiceStatus');
+      status.className = `voice-status ${state === 'active' ? 'active' : state === 'error' ? 'error' : ''}`;
+      status.textContent = message;
+    }
+    
+    function updateTranscript(transcriptData) {
+      const transcript = document.getElementById('transcript');
+      transcript.classList.add('visible');
+      
+      let html = '';
+      transcriptData.forEach(item => {
+        const role = item.role === 'agent' ? 'agent' : 'user';
+        const label = item.role === 'agent' ? 'Riley' : 'You';
+        html += `<p class="${role}"><strong>${label}:</strong> ${item.content}</p>`;
+      });
+      
+      transcript.innerHTML = html;
+      transcript.scrollTop = transcript.scrollHeight;
+    }
+    
+    // ==========================================================================
+    // CHAT MODE
+    // ==========================================================================
+    
     async function startChatSession() {
       try {
-        const response = await fetch(`${API_BASE}/chat/start`, {
+        const response = await fetch(`${CONFIG.backendUrl}/chat/start`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agent_id: CONFIG.chatAgentId })
         });
         
-        if (response.ok) {
-          const data = await response.json();
-          chatSessionId = data.session_id;
+        if (!response.ok) {
+          throw new Error('Failed to start chat session');
         }
+        
+        const data = await response.json();
+        chatId = data.chat_id;
+        console.log('Chat session started:', chatId);
+        
       } catch (error) {
-        console.error('Error starting chat:', error);
+        console.error('Failed to start chat:', error);
+        addChatMessage('agent', 'Sorry, I\'m having trouble connecting. Please try voice mode or call us directly.');
+      }
+    }
+    
+    function handleKeyPress(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
       }
     }
     
     async function sendMessage() {
-      const input = document.getElementById('chat-input');
+      const input = document.getElementById('chatInput');
+      const sendButton = document.getElementById('sendButton');
       const message = input.value.trim();
       
       if (!message) return;
       
-      // Add user message
-      addMessage(message, 'user');
+      // Clear input
       input.value = '';
       
+      // Add user message to chat
+      addChatMessage('user', message);
+      
       // Show typing indicator
-      showTypingIndicator();
+      showTypingIndicator(true);
+      sendButton.disabled = true;
       
       try {
-        const response = await fetch(`${API_BASE}/chat/message`, {
+        // Ensure we have a chat session
+        if (!chatId) {
+          await startChatSession();
+        }
+        
+        // Send message to backend
+        const response = await fetch(`${CONFIG.backendUrl}/chat/message`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            session_id: chatSessionId,
-            message: message
+            chat_id: chatId,
+            content: message
           })
         });
         
-        hideTypingIndicator();
-        
-        if (response.ok) {
-          const data = await response.json();
-          addMessage(data.response, 'assistant');
-        } else {
-          addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+        if (!response.ok) {
+          throw new Error('Failed to send message');
         }
+        
+        const data = await response.json();
+        
+        // Hide typing indicator
+        showTypingIndicator(false);
+        
+        // Add agent responses
+        if (data.messages && data.messages.length > 0) {
+          data.messages.forEach(msg => {
+            if (msg.role === 'agent') {
+              addChatMessage('agent', msg.content);
+            }
+          });
+        }
+        
       } catch (error) {
-        hideTypingIndicator();
-        addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+        console.error('Failed to send message:', error);
+        showTypingIndicator(false);
+        addChatMessage('agent', 'Sorry, I had trouble processing that. Please try again or switch to voice mode.');
       }
+      
+      sendButton.disabled = false;
     }
     
-    function addMessage(text, role) {
-      const container = document.getElementById('chat-messages');
+    function addChatMessage(role, content) {
+      const messagesContainer = document.getElementById('chatMessages');
+      const label = role === 'agent' ? 'Riley' : 'You';
+      
       const messageDiv = document.createElement('div');
       messageDiv.className = `message ${role}`;
-      messageDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
-      container.appendChild(messageDiv);
-      container.scrollTop = container.scrollHeight;
+      messageDiv.innerHTML = `
+        <div class="message-label">${label}</div>
+        <div class="message-bubble">${escapeHtml(content)}</div>
+      `;
+      
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
     
-    function showTypingIndicator() {
-      const container = document.getElementById('chat-messages');
-      const indicator = document.createElement('div');
-      indicator.id = 'typing-indicator';
-      indicator.className = 'message assistant';
-      indicator.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
-      container.appendChild(indicator);
-      container.scrollTop = container.scrollHeight;
+    function showTypingIndicator(show) {
+      document.getElementById('typingIndicator').classList.toggle('visible', show);
     }
     
-    function hideTypingIndicator() {
-      const indicator = document.getElementById('typing-indicator');
-      if (indicator) indicator.remove();
-    }
-    
-    function handleKeyPress(event) {
-      if (event.key === 'Enter') {
-        sendMessage();
-      }
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
   </script>
 </body>
