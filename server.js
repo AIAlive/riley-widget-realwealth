@@ -73,7 +73,7 @@ app.post("/chat/start", async (req, res) => {
       return res.status(400).json({ error: "Chat agent not configured" });
     }
 
-    const chatResponse = await client.chat.createChatSession({
+    const chatResponse = await client.chat.create({
       agent_id: agentId,
     });
 
@@ -116,7 +116,7 @@ app.post("/chat/end", async (req, res) => {
       return res.status(400).json({ error: "chat_id required" });
     }
 
-    await client.chat.endChatSession({ chat_id });
+    await client.chat.end(chat_id);
     res.json({ success: true });
   } catch (error) {
     console.error("Error ending chat:", error);
