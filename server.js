@@ -1,6 +1,10 @@
 /**
  * RealWealth Riley Widget Server v2.0
  * Voice + Chat support
+ * 
+ * Copyright (c) 2026 AI Alive, Inc.
+ * Author: Gerard JR Keenan
+ * https://aialive.app
  */
 
 const express = require("express");
