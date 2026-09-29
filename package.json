@@ -1,15 +1,18 @@
 {
   "name": "realwealth-riley-widget",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "RealWealth Riley AI Widget",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "build": "esbuild public/app.js --bundle --minify --format=iife --global-name=App --outfile=public/bundle.js",
+    "start": "npm run build && node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
-    "retell-sdk": "^4.0.0"
+    "retell-sdk": "^6.0.1",
+    "retell-client-js-sdk": "3.0.1",
+    "esbuild": "^0.28.2"
   },
   "engines": {
     "node": ">=18"
