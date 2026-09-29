@@ -1,5 +1,6 @@
+// v2.1.0 - 2026-09-28 - retell-sdk 6.x (createWebCall now uses /v3/create-web-call); returns transport + ice_servers to the browser
 /**
- * RealWealth Riley Widget Server v2.0
+ * RealWealth Riley Widget Server v2.1.0
  * Voice + Chat support
  * 
  * Copyright (c) 2026 AI Alive, Inc.
@@ -31,6 +32,7 @@ const client = new Retell({
 app.get("/health", (req, res) => {
   res.json({ 
     status: "healthy",
+    version: "2.1.0",
     voice: !!VOICE_AGENT_ID,
     chat: !!CHAT_AGENT_ID
   });
@@ -61,6 +63,9 @@ app.post("/create-web-call", async (req, res) => {
     res.json({
       access_token: webCallResponse.access_token,
       call_id: webCallResponse.call_id,
+      // v3 web calls: the browser needs these to connect
+      transport: webCallResponse.transport,
+      ice_servers: webCallResponse.ice_servers,
     });
   } catch (error) {
     console.error("Error creating web call:", error);
@@ -136,7 +141,7 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`
 ╔═══════════════════════════════════════════════════════════╗
-║          RealWealth Riley Widget v2.0                     ║
+║          RealWealth Riley Widget v2.1.0                   ║
 ║          Powered by AI Alive                              ║
 ╠═══════════════════════════════════════════════════════════╣
 ║  Server: http://localhost:${PORT}                             ║
